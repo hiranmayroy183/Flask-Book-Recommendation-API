@@ -1,6 +1,3 @@
-Sure! Here’s a comprehensive `README.md` file for your project:
-
----
 
 # Book Recommendation API
 
