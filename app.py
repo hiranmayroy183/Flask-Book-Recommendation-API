@@ -1,9 +1,16 @@
+import os
 from flask import Flask, request, jsonify
 from flask_caching import Cache
 from utils.data_loader import DataLoader
 
 app = Flask(__name__)
-app.config['CACHE_TYPE'] = 'simple'  # Simple in-memory caching
+
+# Conditional caching setup based on environment
+if os.getenv('FLASK_ENV') == 'test':
+    app.config['CACHE_TYPE'] = 'null'  # Disable caching during tests
+else:
+    app.config['CACHE_TYPE'] = 'simple'  # Simple in-memory caching
+
 cache = Cache(app)
 
 # Initialize the DataLoader with paths to your CSV files
@@ -13,8 +20,13 @@ data_loader = DataLoader('data/1.csv', 'data/2.csv')
 @cache.cached(timeout=60, query_string=True)  # Cache responses for 60 seconds
 def recommend():
     author = request.args.get('author')
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        if page < 1 or per_page < 1:
+            raise ValueError("Page and per_page must be positive integers.")
+    except ValueError:
+        return jsonify({'error': 'Invalid page or per_page parameter'}), 400
 
     try:
         recommendations = data_loader.get_recommendations(author)
