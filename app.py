@@ -14,6 +14,7 @@ else:
 cache = Cache(app)
 
 # Initialize the DataLoader with paths to your CSV files
+# Adjust these paths if needed for deployment
 data_loader = DataLoader('data/1.csv', 'data/2.csv')
 
 @app.route('/recommend', methods=['GET'])
@@ -46,4 +47,5 @@ def recommend():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Set host and port for deployment
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=True)
